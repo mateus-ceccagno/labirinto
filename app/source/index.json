@@ -1,0 +1,8 @@
+{
+  "respawnCamera":[1, 0.5, 1],
+  "imagem":{
+    "textura":"../images/parede-neve.jpg"
+  },
+  "level":1,
+  "labirinto":[]
+}
