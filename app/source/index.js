@@ -8,7 +8,7 @@ class Main {
         this.three = {
             renderer: new THREE.WebGLRenderer(),
             relogio: new THREE.Clock(),
-            camera: new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000),
+            camera: new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 30000),
             cena: new THREE.Scene(),
             luminosidade: new THREE.PointLight(0xffffff),
             controles: null,
@@ -83,7 +83,7 @@ class Main {
         cena.add(new THREE.AmbientLight(0x444444));
 
         let luminosidade = three.luminosidade;
-        luminosidade.position.set(0, 50, 0);
+        luminosidade.position.set(50, 50, 50);
 
         cena.add(luminosidade);
     }
@@ -93,12 +93,12 @@ class Main {
         let cena = three.cena;
         
         let materialArray = [];
-        let texture_ft = new THREE.TextureLoader().load('../images/arid2_ft.jpg');
-        let texture_bk = new THREE.TextureLoader().load('../images/arid2_bk.jpg');
-        let texture_up = new THREE.TextureLoader().load('../images/arid2_up.jpg');
-        let texture_dn = new THREE.TextureLoader().load('../images/arid2_dn.jpg');
-        let texture_rt = new THREE.TextureLoader().load('../images/arid2_rt.jpg');
-        let texture_lf = new THREE.TextureLoader().load('../images/arid2_lf.jpg');
+        let texture_ft = new THREE.TextureLoader().load('../images/haze_ft.jpg');
+        let texture_bk = new THREE.TextureLoader().load('../images/haze_bk.jpg');
+        let texture_up = new THREE.TextureLoader().load('../images/haze_up.jpg');
+        let texture_dn = new THREE.TextureLoader().load('../images/haze_dn.jpg');
+        let texture_rt = new THREE.TextureLoader().load('../images/haze_rt.jpg');
+        let texture_lf = new THREE.TextureLoader().load('../images/haze_lf.jpg');
 
         materialArray.push(new THREE.MeshBasicMaterial({ map: texture_ft }));
         materialArray.push(new THREE.MeshBasicMaterial({ map: texture_bk }));

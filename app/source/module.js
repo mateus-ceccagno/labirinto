@@ -37,12 +37,16 @@ export class Module {
         let level = data.level+2;
         let matriz = this.prim.generate(level,level,[1,1],[(level)*2-1, (level)*2-1]);
         let imagem = data.imagem.textura;
+        let imagemChao = data.imagemChao.textura;
 
         let objBsp;
         let map = new THREE.TextureLoader().load(imagem);
+        let footer = new THREE.TextureLoader().load(imagemChao);
         let materialSolid = new THREE.MeshLambertMaterial({map:map, side:THREE.DoubleSide});
-        let materialTransparent = new THREE.MeshLambertMaterial( { color: 0xffffff, opacity: 0.5, transparent: true } );
-        let materials = [ materialSolid, materialTransparent, materialTransparent, materialTransparent, materialSolid, materialSolid ];
+        let materialTransparent = new THREE.MeshLambertMaterial( { color: 0xffffff, opacity: 0, transparent: true } );
+        let materialFooter = new THREE.MeshLambertMaterial({map:footer, side:THREE.DoubleSide});
+        let materials = [ materialSolid, materialTransparent, materialFooter ];
+        
         that.atualizaCheckPoint({x:(level)*2-1, y:0, z:(level)*2-1});
 
         // se houver mesh, remover 
@@ -80,7 +84,18 @@ export class Module {
 
         that.mesh.material = materials;
         that.mesh.name = "textura";
-
+        let faces = that.mesh.geometry.faces;
+        
+        for(let i =0; i<faces.length; i++){
+            // atribui para faces do teto, material transparente
+            if(faces[i].vertexNormals[0].y == 1){
+                faces[i].materialIndex = 1;
+            }
+            // atribui para faces do chao, material chão
+            if(faces[i].vertexNormals[0].z == 0 && faces[i].vertexNormals[0].x == 0 && faces[i].vertexNormals[0].y != 1){
+                faces[i].materialIndex = 2;
+            }
+        }
         cena.add(that.mesh);
         relogio.getDelta();
         document.getElementById("text").innerText = `${data.level}`;
@@ -95,7 +110,7 @@ export class Module {
         if(!this.end){
             let main = that.main;
             let cena = main.three.cena;
-            that.end = new THREE.Mesh(new THREE.OctahedronGeometry( .3, 0 ), new THREE.MeshPhongMaterial({color:0xffb000}));
+            that.end = new THREE.Mesh(new THREE.SphereGeometry( 0.25, 32, 32 ), new THREE.MeshPhongMaterial({color:0x8FA8DC}));
             cena.add(that.end);
         }
 

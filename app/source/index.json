@@ -1,8 +1,11 @@
 {
   "respawnCamera":[1, 0.5, 1],
   "imagem":{
-    "textura":"../images/parede-neve.jpg"
+    "textura":"../images/neve-grama-chao.jpg"
   },
-  "level":1,
+  "imagemChao":{
+    "textura":"../images/chao-pegadas.jpg"
+  },
+  "level": 1,
   "labirinto":[]
 }
