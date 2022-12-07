@@ -460,33 +460,6 @@ class Main {
                     estado.podePular = true;
                 }
 
-                
-                if(that.data != undefined){
-                    if(that.data.level > 1) {
-                        if(that.estado.countNeve % 7 == 0){
-                            that.snow();
-                        }
-                        that.estado.countNeve++;
-                    }
-                    // Ativa fim de jogo
-                    if(that.data.level > 3) {
-                        if(that.estado.countFase4 < 300){
-                            velocidade.x = 5;
-                            velocidade.y = 5;
-                            velocidade.z = 5;
-                        } else {
-                            velocidade.x = 2000;
-                            velocidade.y = 2000;
-                            velocidade.z = 2000;
-                        }
-
-                        if (that.estado.countFase4 > 1500) {
-                            window.location.reload(true);
-                        }
-                        that.estado.countFase4++;
-                    }
-                }
-
                 controle.translateX(velocidade.x * delta);
                 controle.translateY(velocidade.y * delta);
                 controle.translateZ(velocidade.z * delta);
@@ -496,6 +469,31 @@ class Main {
                     velocidade.y = 0;
                     controle.position.y = 0.1;
                     estado.podePular = true;
+                }
+            }
+            if(that.data != undefined){
+                if(that.data.level > 1) {
+                    if(that.estado.countNeve % 7 == 0){
+                        that.snow();
+                    }
+                    that.estado.countNeve++;
+                }
+                // Ativa fim de jogo
+                if(that.data.level > 3) {
+                    if(that.estado.countFase4 < 300){
+                        velocidade.x = 5;
+                        velocidade.y = 5;
+                        velocidade.z = 5;
+                    } else {
+                        velocidade.x = 2000;
+                        velocidade.y = 2000;
+                        velocidade.z = 2000;
+                    }
+    
+                    if (that.estado.countFase4 > 1500) {
+                        window.location.reload(true);
+                    }
+                    that.estado.countFase4++;
                 }
             }
         }
@@ -508,6 +506,7 @@ class Main {
             that.movimentacao();
         });
         //renderer.clear();
+
     }
 
     desenhar() {
