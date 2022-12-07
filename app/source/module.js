@@ -38,14 +38,17 @@ export class Module {
         let matriz = this.prim.generate(level,level,[1,1],[(level)*2-1, (level)*2-1]);
         let imagem = data.imagem.textura;
         let imagemChao = data.imagemChao.textura;
+        let imagemNotSun = data.imagemNotSun.textura;
 
         let objBsp;
         let map = new THREE.TextureLoader().load(imagem);
         let footer = new THREE.TextureLoader().load(imagemChao);
+        let notSun = new THREE.TextureLoader().load(imagemNotSun);
         let materialSolid = new THREE.MeshLambertMaterial({map:map, side:THREE.DoubleSide});
         let materialTransparent = new THREE.MeshLambertMaterial( { color: 0xffffff, opacity: 0, transparent: true } );
         let materialFooter = new THREE.MeshLambertMaterial({map:footer, side:THREE.DoubleSide});
-        let materials = [ materialSolid, materialTransparent, materialFooter ];
+        let materialNotSun = new THREE.MeshLambertMaterial({map:notSun, side:THREE.DoubleSide});
+        let materials = [ materialSolid, materialTransparent, materialFooter, materialNotSun ];
         
         that.atualizaCheckPoint({x:(level)*2-1, y:0, z:(level)*2-1});
 
@@ -92,8 +95,18 @@ export class Module {
                 faces[i].materialIndex = 1;
             }
             // atribui para faces do chao, material chão
-            if(faces[i].vertexNormals[0].z == 0 && faces[i].vertexNormals[0].x == 0 && faces[i].vertexNormals[0].y != 1){
+            if(faces[i].vertexNormals[0].z == 0 && faces[i].vertexNormals[0].x == 0 && faces[i].vertexNormals[0].y == -1){
                 faces[i].materialIndex = 2;
+            }
+
+            // atribui para onde o sol não incide, material com mais neve
+            if(faces[i].vertexNormals[0].x == 1 && faces[i].vertexNormals[0].y == 0){
+                faces[i].materialIndex = 3;
+            }
+
+            // atribui para faces do chao, material chão
+            if(faces[i].vertexNormals[0].z == 1 ){
+                faces[i].materialIndex = 3;
             }
         }
         cena.add(that.mesh);

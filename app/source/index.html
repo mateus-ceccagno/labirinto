@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Labirinto Nova Petrópolis</title>
+    <title>Nova Labirinto</title>
     <style>
         html, body {
             margin: 0;
@@ -57,16 +57,17 @@
 <div id="translucido" >
 
     <div id="instrucoes">
-        <span style="font-size:40px">Labirinto Nova Petrópolis</span>
+        <span style="font-size:40px">Nova Labirinto</span>
         <br />
         <br />
-        (Utilize W, A, S, D, Espaço e Mouse)
+        (Utilize W, A, S, D e Mouse)
     </div>
 
 </div>
 
 <div id="text">1</div>
 </body>
+
 <script src="../js/dop.min.js"></script>
 <script src="../js/three.js"></script>
 <script src="../js/threebsp.js"></script>
@@ -74,4 +75,40 @@
 <script src="../js/stats.min.js"></script>
 <script src="../js/Detector.js"></script>
 <script type="module" src="./index.js"></script>
+<!-- <script type="text/javascript" src="../js/three-r54.min.js"></script> -->
+<script type="text/javascript" src="../js/dat.gui.min.js"></script>
+
+<script type="x-shader/x-vertex" id="step07_vs">
+    uniform float radiusX;
+    uniform float radiusZ;
+    uniform float size;
+    uniform float scale;
+    uniform float height;
+    uniform float elapsedTime;
+    uniform float speedH;
+    uniform float speedV;
+
+    void main() {
+        vec3 pos = position;
+        pos.x += cos((elapsedTime + position.z) * 0.25 * speedH) * radiusX;
+        pos.y = mod(pos.y - elapsedTime * speedV, height);
+        pos.z += sin((elapsedTime + position.x) * 0.25 * speedH) * radiusZ;
+
+        vec4 mvPosition = modelViewMatrix * vec4( pos, 1.0 );
+
+        gl_PointSize = size * ( scale / length( mvPosition.xyz ) );
+
+        gl_Position = projectionMatrix * mvPosition;
+    }
+</script>
+<script type="x-shader/x-fragment" id="step09_fs">
+    uniform vec3 color;
+    uniform float opacity;
+    uniform sampler2D texture;
+
+    void main() {
+        vec4 texColor = texture2D( texture, gl_PointCoord );
+        gl_FragColor = texColor * vec4( color, opacity );
+    }
+</script>
 </html>

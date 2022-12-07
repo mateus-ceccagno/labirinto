@@ -13,7 +13,8 @@ class Main {
             luminosidade: new THREE.PointLight(0xffffff),
             controles: null,
             translucido: document.getElementById('translucido'),
-            instrucoes: document.getElementById('instrucoes')
+            instrucoes: document.getElementById('instrucoes'),
+            textureSnow: THREE.ImageUtils.loadTexture( './../images/snowflake1.png' )
         };
 
         this.estado = {
@@ -26,7 +27,8 @@ class Main {
             espacoPressionado: true, // resolve o problema da tecla espaço pressionada por longo tempo
             velocidade: new THREE.Vector3(),
             direcao: new THREE.Vector3(),
-            rotacao: new THREE.Vector3()
+            rotacao: new THREE.Vector3(),
+            count: 0
         };
 
         //ray casting
@@ -115,6 +117,108 @@ class Main {
         let skybox = new THREE.Mesh(skyboxGeo, materialArray);
 
         cena.add(skybox);
+    }
+
+    rand( v ) {
+		return (v * (Math.random() - 0.5));
+	}
+
+    snow() {
+        let three = this.three;
+        let cena = three.cena;
+        let renderer = three.renderer;
+        var 
+		particleSystem,
+		particleSystemHeight = 100.0,
+		clock,
+		controls,
+		parameters,
+		onParametersUpdate,
+		texture = three.textureSnow;
+
+		var numParticles = 10000,
+			width = 100,
+			height = particleSystemHeight,
+			depth = 100,
+			parameters = {
+				color: 0xFFFFFF,
+				height: particleSystemHeight,
+				radiusX: 2.5,
+				radiusZ: 2.5,
+				size: 100,
+				scale: 4.0,
+				opacity: 0.4,
+				speedH: 1.0,
+				speedV: 1.0
+			},
+			systemGeometry = new THREE.Geometry(),
+			systemMaterial = new THREE.ShaderMaterial({
+				uniforms: {
+					color:  { type: 'c', value: new THREE.Color( parameters.color ) },
+					height: { type: 'f', value: parameters.height },
+					elapsedTime: { type: 'f', value: 0 },
+					radiusX: { type: 'f', value: parameters.radiusX },
+					radiusZ: { type: 'f', value: parameters.radiusZ },
+					size: { type: 'f', value: parameters.size },
+					scale: { type: 'f', value: parameters.scale },
+					opacity: { type: 'f', value: parameters.opacity },
+					texture: { type: 't', value: texture },
+					speedH: { type: 'f', value: parameters.speedH },
+					speedV: { type: 'f', value: parameters.speedV }
+				},
+				vertexShader: document.getElementById( 'step07_vs' ).textContent,
+				fragmentShader: document.getElementById( 'step09_fs' ).textContent,
+				blending: THREE.AdditiveBlending,
+				transparent: true,
+				depthTest: false
+			});
+	 
+		for( var i = 0; i < numParticles; i++ ) {
+			var vertex = new THREE.Vector3(
+                    width * (Math.random() - 0.5),
+					Math.random() * height,
+					depth * (Math.random() - 0.5)
+				);
+
+			systemGeometry.vertices.push( vertex );
+		}
+
+		particleSystem = new THREE.ParticleSystem( systemGeometry, systemMaterial );
+		particleSystem.position.y = -height/2;
+
+		cena.add( particleSystem );
+
+		clock = new THREE.Clock();
+        var elapsedTime = clock.getElapsedTime();
+
+		particleSystem.material.uniforms.elapsedTime.value = elapsedTime * 10;
+		document.body.appendChild( renderer.domElement );
+
+		onParametersUpdate = function( v ) {
+			systemMaterial.uniforms.color.value.set( parameters.color );
+			systemMaterial.uniforms.height.value = parameters.height;
+			systemMaterial.uniforms.radiusX.value = parameters.radiusX;
+			systemMaterial.uniforms.radiusZ.value = parameters.radiusZ;
+			systemMaterial.uniforms.size.value = parameters.size;
+			systemMaterial.uniforms.scale.value = parameters.scale;
+			systemMaterial.uniforms.opacity.value = parameters.opacity;
+			systemMaterial.uniforms.speedH.value = parameters.speedH;
+			systemMaterial.uniforms.speedV.value = parameters.speedV;
+		}
+
+		controls = new dat.GUI();
+		controls.close();
+
+		controls.addColor( parameters, 'color' ).onChange( onParametersUpdate );
+		controls.add( parameters, 'height', 0, particleSystemHeight * 2.0 ).onChange( onParametersUpdate );
+		controls.add( parameters, 'radiusX', 0, 10 ).onChange( onParametersUpdate );
+		controls.add( parameters, 'radiusZ', 0, 10 ).onChange( onParametersUpdate );
+		controls.add( parameters, 'size', 1, 400 ).onChange( onParametersUpdate );
+		controls.add( parameters, 'scale', 1, 30 ).onChange( onParametersUpdate );
+		controls.add( parameters, 'opacity', 0, 1 ).onChange( onParametersUpdate );
+		controls.add( parameters, 'speedH', 0.1, 3 ).onChange( onParametersUpdate );
+		controls.add( parameters, 'speedV', 0.1, 3 ).onChange( onParametersUpdate );
+ 
     }
 
     propsControles() {
@@ -259,7 +363,7 @@ class Main {
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
     }
-
+    
     movimentacao() {
         let that = this;
         let three = that.three;
@@ -277,9 +381,8 @@ class Main {
         let speed = configs.velocidade;
 
         let controle = three.controles.getObject();
-
+        
         function renderiza() {
-
             let paraFrente = estado.paraFrente;
             let paraTras = estado.paraTras;
             let paraEsquerda = estado.paraEsquerda;
@@ -287,7 +390,7 @@ class Main {
             let velocidade = estado.velocidade;
             let direcao = estado.direcao;
             let rotacao = estado.rotacao;
-
+            that.snow();
             // obtem tempo de atualização
             let delta = three.relogio.getDelta();
 
@@ -374,6 +477,25 @@ class Main {
                     estado.podePular = true;
                 }
 
+                if(that.data != undefined){
+                    if(that.data.level === 3) {
+                        that.snow();
+                        velocidade.x = 20;
+                        velocidade.y = 20;
+                        velocidade.z = 20;
+                        that.estado.count++;
+                    }
+                    if(that.estado.count > 200){
+                        velocidade.x = 2000;
+                        velocidade.y = 2000;
+                        velocidade.z = 2000;
+                        that.estado.count++;
+                    }
+                    if(that.estado.count > 500){
+                        window.location.reload(true);
+                    }
+                }
+
                 controle.translateX(velocidade.x * delta);
                 controle.translateY(velocidade.y * delta);
                 controle.translateZ(velocidade.z * delta);
@@ -387,13 +509,21 @@ class Main {
             }
         }
 
+
+
         renderiza();
 
         renderer.render(cena, camera);
+        
+        cena.children.forEach(child => {
+            if(child.type == 'Points')
+                cena.remove(child);
+        });
 
         requestAnimationFrame(function () {
             that.movimentacao();
         });
+        //renderer.clear();
     }
 
     desenhar() {
@@ -409,6 +539,7 @@ class Main {
         that.propsControles();
         that.propsModule();
         that.sky();
+        
         that.updateModule("./index.json");
 
         that.movimentacao();
