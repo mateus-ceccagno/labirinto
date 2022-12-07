@@ -28,7 +28,8 @@ class Main {
             velocidade: new THREE.Vector3(),
             direcao: new THREE.Vector3(),
             rotacao: new THREE.Vector3(),
-            count: 0
+            countFase4: 0,
+            countNeve: 0,
         };
 
         //ray casting
@@ -129,34 +130,43 @@ class Main {
         let renderer = three.renderer;
         var 
 		particleSystem,
-		particleSystemHeight = 100.0,
+		particleSystemHeight = 25.0,
 		clock,
 		controls,
 		parameters,
 		onParametersUpdate,
+        numParticles,
 		texture = three.textureSnow;
+        
+        let that = this;
+        if(that.data != undefined){
+            if (that.data.level > 2) {
+                numParticles = 50000
+            } else {
+                numParticles = 25000
+            }
+        }
 
-		var numParticles = 10000,
-			width = 100,
+		var width = 40,
 			height = particleSystemHeight,
-			depth = 100,
+			depth = 40,
 			parameters = {
 				color: 0xFFFFFF,
 				height: particleSystemHeight,
-				radiusX: 2.5,
-				radiusZ: 2.5,
+				radiusX: 1.5,
+				radiusZ: 1.5,
 				size: 100,
-				scale: 4.0,
-				opacity: 0.4,
-				speedH: 1.0,
-				speedV: 1.0
+				scale: 1.5,
+				opacity: 0.5,
+				speedH: 0.0025,
+				speedV: 0.0025
 			},
 			systemGeometry = new THREE.Geometry(),
 			systemMaterial = new THREE.ShaderMaterial({
 				uniforms: {
 					color:  { type: 'c', value: new THREE.Color( parameters.color ) },
 					height: { type: 'f', value: parameters.height },
-					elapsedTime: { type: 'f', value: 0 },
+					elapsedTime: { type: 'f', value: 10 },
 					radiusX: { type: 'f', value: parameters.radiusX },
 					radiusZ: { type: 'f', value: parameters.radiusZ },
 					size: { type: 'f', value: parameters.size },
@@ -172,7 +182,7 @@ class Main {
 				transparent: true,
 				depthTest: false
 			});
-	 
+
 		for( var i = 0; i < numParticles; i++ ) {
 			var vertex = new THREE.Vector3(
                     width * (Math.random() - 0.5),
@@ -183,42 +193,15 @@ class Main {
 			systemGeometry.vertices.push( vertex );
 		}
 
-		particleSystem = new THREE.ParticleSystem( systemGeometry, systemMaterial );
+		particleSystem = new THREE.Points( systemGeometry, systemMaterial );
 		particleSystem.position.y = -height/2;
-
-		cena.add( particleSystem );
-
-		clock = new THREE.Clock();
-        var elapsedTime = clock.getElapsedTime();
-
-		particleSystem.material.uniforms.elapsedTime.value = elapsedTime * 10;
-		document.body.appendChild( renderer.domElement );
-
-		onParametersUpdate = function( v ) {
-			systemMaterial.uniforms.color.value.set( parameters.color );
-			systemMaterial.uniforms.height.value = parameters.height;
-			systemMaterial.uniforms.radiusX.value = parameters.radiusX;
-			systemMaterial.uniforms.radiusZ.value = parameters.radiusZ;
-			systemMaterial.uniforms.size.value = parameters.size;
-			systemMaterial.uniforms.scale.value = parameters.scale;
-			systemMaterial.uniforms.opacity.value = parameters.opacity;
-			systemMaterial.uniforms.speedH.value = parameters.speedH;
-			systemMaterial.uniforms.speedV.value = parameters.speedV;
-		}
-
-		controls = new dat.GUI();
-		controls.close();
-
-		controls.addColor( parameters, 'color' ).onChange( onParametersUpdate );
-		controls.add( parameters, 'height', 0, particleSystemHeight * 2.0 ).onChange( onParametersUpdate );
-		controls.add( parameters, 'radiusX', 0, 10 ).onChange( onParametersUpdate );
-		controls.add( parameters, 'radiusZ', 0, 10 ).onChange( onParametersUpdate );
-		controls.add( parameters, 'size', 1, 400 ).onChange( onParametersUpdate );
-		controls.add( parameters, 'scale', 1, 30 ).onChange( onParametersUpdate );
-		controls.add( parameters, 'opacity', 0, 1 ).onChange( onParametersUpdate );
-		controls.add( parameters, 'speedH', 0.1, 3 ).onChange( onParametersUpdate );
-		controls.add( parameters, 'speedV', 0.1, 3 ).onChange( onParametersUpdate );
- 
+        
+        cena.children.forEach(child => {
+            if(child.type == 'Points')
+                cena.remove(child);
+        });
+        
+        cena.add( particleSystem );
     }
 
     propsControles() {
@@ -390,7 +373,7 @@ class Main {
             let velocidade = estado.velocidade;
             let direcao = estado.direcao;
             let rotacao = estado.rotacao;
-            that.snow();
+            
             // obtem tempo de atualização
             let delta = three.relogio.getDelta();
 
@@ -477,22 +460,30 @@ class Main {
                     estado.podePular = true;
                 }
 
+                
                 if(that.data != undefined){
-                    if(that.data.level === 3) {
-                        that.snow();
-                        velocidade.x = 20;
-                        velocidade.y = 20;
-                        velocidade.z = 20;
-                        that.estado.count++;
+                    if(that.data.level > 1) {
+                        if(that.estado.countNeve % 7 == 0){
+                            that.snow();
+                        }
+                        that.estado.countNeve++;
                     }
-                    if(that.estado.count > 200){
-                        velocidade.x = 2000;
-                        velocidade.y = 2000;
-                        velocidade.z = 2000;
-                        that.estado.count++;
-                    }
-                    if(that.estado.count > 500){
-                        window.location.reload(true);
+                    // Ativa fim de jogo
+                    if(that.data.level > 3) {
+                        if(that.estado.countFase4 < 300){
+                            velocidade.x = 5;
+                            velocidade.y = 5;
+                            velocidade.z = 5;
+                        } else {
+                            velocidade.x = 2000;
+                            velocidade.y = 2000;
+                            velocidade.z = 2000;
+                        }
+
+                        if (that.estado.countFase4 > 1500) {
+                            window.location.reload(true);
+                        }
+                        that.estado.countFase4++;
                     }
                 }
 
@@ -508,17 +499,10 @@ class Main {
                 }
             }
         }
-
-
-
+        
         renderiza();
 
         renderer.render(cena, camera);
-        
-        cena.children.forEach(child => {
-            if(child.type == 'Points')
-                cena.remove(child);
-        });
 
         requestAnimationFrame(function () {
             that.movimentacao();

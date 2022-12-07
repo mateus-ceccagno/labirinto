@@ -90,9 +90,9 @@
 
     void main() {
         vec3 pos = position;
-        pos.x += cos((elapsedTime + position.z) * 0.25 * speedH) * radiusX;
-        pos.y = mod(pos.y - elapsedTime * speedV, height);
-        pos.z += sin((elapsedTime + position.x) * 0.25 * speedH) * radiusZ;
+        pos.x += cos((elapsedTime + position.z) * 0.0001 * speedH) * radiusX;
+        pos.y = mod(pos.y - elapsedTime * speedV * 0.0001, height);
+        pos.z += sin((elapsedTime + position.x) * 0.0001 * speedH) * radiusZ;
 
         vec4 mvPosition = modelViewMatrix * vec4( pos, 1.0 );
 
